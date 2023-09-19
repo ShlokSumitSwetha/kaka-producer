@@ -4,6 +4,9 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  profiles:
+    active:
+      - transaction
 
 topic:
   name: users

@@ -22,6 +22,12 @@ public class KakaProducerApplication implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 
-		producerService.sendMessage(1, new User("Sumith2", 36) );
+		//producerService.sendMessage("", "MY first message");
+
+		/**
+		 * Transaction enable this
+		 */
+		producerService.sendMessageInTransaction("11234", "Sumith sending first message");
+
 	}
 }

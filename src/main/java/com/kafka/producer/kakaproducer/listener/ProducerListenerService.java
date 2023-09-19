@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
-public class ProducerListenerService implements ProducerListener<Integer, User> {
+public class ProducerListenerService implements ProducerListener<String, String> {
 
     @Override
     public void onSuccess(ProducerRecord producerRecord, RecordMetadata recordMetadata) {
-        log.info(String.format("Message %s persisted at Offset %d",
-                producerRecord.value(), recordMetadata.offset()));
+        log.info(String.format("Message %s persisted at Offset %d partition %d",
+                producerRecord.value(), recordMetadata.offset(), recordMetadata.partition()));
     }
 
     @Override

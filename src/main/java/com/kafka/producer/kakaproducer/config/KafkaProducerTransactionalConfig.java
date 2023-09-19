@@ -12,13 +12,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.transaction.KafkaTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.*;
 
 @Log4j2
 @Configuration
-@Profile("non-transaction")
-public class KafkaProducerConfig {
+@Profile("transaction")
+@EnableTransactionManagement
+public class KafkaProducerTransactionalConfig {
 
     @Autowired
     private ProducerListenerService producerListener;
@@ -37,14 +40,21 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
+        DefaultKafkaProducerFactory<String, String> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
+        producerFactory.setTransactionIdPrefix("my-transactional-id-");
+        return producerFactory;
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> pf) {
-        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(pf);
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
         kafkaTemplate.setDefaultTopic(topic);
         kafkaTemplate.setProducerListener(producerListener);
         return kafkaTemplate;
+    }
+
+    @Bean
+    public KafkaTransactionManager<String, String> transactionManager(ProducerFactory<String, String> producerFactory) {
+        return new KafkaTransactionManager<>(producerFactory);
     }
 }
